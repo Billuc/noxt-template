@@ -3,8 +3,6 @@ import htm from "htm";
 
 const html = htm.bind(h);
 
-export const prerender = true;
-
 export default function HomePage() {
   return html`
     <div>

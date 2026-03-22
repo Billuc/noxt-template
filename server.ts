@@ -26,6 +26,16 @@ export type ServerFunctions<Req extends Request, S> = {
 export function createServer<Req extends Request, S>(
   options: ServerOptions,
 ): ServerFunctions<Req, S> {
+  if (options.development) {
+    return createDevServer(options);
+  } else {
+    return createProdServer(options);
+  }
+}
+
+function createProdServer<Req extends Request, S>(
+  options: ServerOptions,
+): ServerFunctions<Req, S> {
   const publicOutputDir = path.join(options.outputDir ?? "./dist", "public");
   if (options.publicDir) {
     cpSync(options.publicDir, publicOutputDir, { recursive: true });
@@ -34,24 +44,17 @@ export function createServer<Req extends Request, S>(
   }
 
   const prerender = (page: Component) => {
-    if (options.development) {
-      const htmlContent = renderToString(componentToVNode(page), {});
-      return new Response(htmlContent, {
-        headers: { "Content-Type": "text/html" },
-      });
-    } else {
-      const vnode = componentToVNode(page);
-      const htmlContent = renderToString(vnode, {});
-      const filepath = path.join(
-        publicOutputDir,
-        Bun.randomUUIDv7("base64url") + ".html",
-      );
-      writeFileSync(filepath, htmlContent);
+    const vnode = componentToVNode(page);
+    const htmlContent = renderToString(vnode, {});
+    const filepath = path.join(
+      publicOutputDir,
+      Bun.randomUUIDv7("base64url") + ".html",
+    );
+    writeFileSync(filepath, htmlContent);
 
-      return new Response(Bun.file(filepath), {
-        headers: { "Content-Type": "text/html" },
-      });
-    }
+    return new Response(Bun.file(filepath), {
+      headers: { "Content-Type": "text/html" },
+    });
   };
 
   const ssr = <Req extends Request, S>(page: Component) => {
@@ -69,6 +72,39 @@ export function createServer<Req extends Request, S>(
 
   const staticFile = (filepath: string): Response => {
     const fullFilepath = path.join(publicOutputDir, filepath);
+    return new Response(Bun.file(fullFilepath));
+  };
+
+  return { prerender, ssr, staticFile };
+}
+
+function createDevServer<Req extends Request, S>(
+  options: ServerOptions,
+): ServerFunctions<Req, S> {
+  const publicDir = options.publicDir ?? "./public";
+
+  const prerender = (page: Component) => {
+    const htmlContent = renderToString(componentToVNode(page), {});
+    return new Response(htmlContent, {
+      headers: { "Content-Type": "text/html" },
+    });
+  };
+
+  const ssr = <Req extends Request, S>(page: Component) => {
+    const handler: Serve.Handler<Req, S, Response> = (req, server) => {
+      const stream = renderToReadableStream(componentToVNode(page), {
+        req,
+        server,
+      });
+      return new Response(stream, {
+        headers: { "Content-Type": "text/html" },
+      });
+    };
+    return handler;
+  };
+
+  const staticFile = (filepath: string): Response => {
+    const fullFilepath = path.join(publicDir, filepath);
     return new Response(Bun.file(fullFilepath));
   };
 

@@ -1,5 +1,5 @@
 import { createServer } from "./server.js";
-import AboutPage from "./src/pages/about.js";
+import AboutPage from "./src/pages/about.jsx";
 import HomePage from "./src/pages/index.js";
 
 const PORT = 3000;
