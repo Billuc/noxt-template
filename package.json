@@ -7,5 +7,10 @@
   },
   "peerDependencies": {
     "typescript": "^5"
+  },
+  "dependencies": {
+    "htm": "^3.1.1",
+    "preact": "^10.29.0",
+    "preact-render-to-string": "^6.6.6"
   }
 }
