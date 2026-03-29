@@ -1,4 +1,4 @@
-import { pagesPlugin } from "./plugin";
+import { pagesPlugin } from "./archive/plugin";
 
 const result = await Bun.build({
   entrypoints: ["./index.ts"],

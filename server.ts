@@ -1,119 +1,35 @@
-import type { Serve } from "bun";
-import { type Attributes, type VNode } from "preact";
-import renderToString from "preact-render-to-string";
-import { renderToReadableStream } from "preact-render-to-string/stream";
-import { mkdirSync, writeFileSync, cpSync } from "node:fs";
-import path from "node:path";
+import type { BunRequest } from "bun";
+import type { ComponentType } from "preact";
+import { h } from "preact";
+import { renderToString } from "preact-render-to-string";
+import { join } from "node:path";
 
-export type Component = () => VNode<Attributes> | VNode<Attributes>[];
+type PrerenderComponent = ComponentType<{}>;
+type SSRComponent = ComponentType<{ req: BunRequest }>;
 
-export type HandlerGenerator<Req extends Request, S> = (
-  page: Component,
-) => Serve.Handler<Req, S, Response> | Response;
+export function prerender(component: PrerenderComponent) {
+  const vnode = h(component, {});
+  const htmlContent = renderToString(vnode);
 
-export type ServerOptions = {
-  development: boolean;
-  outputDir?: string;
-  publicDir?: string;
-};
-
-export type ServerFunctions<Req extends Request, S> = {
-  prerender: HandlerGenerator<Req, S>;
-  ssr: HandlerGenerator<Req, S>;
-  staticFile: (path: string) => Response;
-};
-
-export function createServer<Req extends Request, S>(
-  options: ServerOptions,
-): ServerFunctions<Req, S> {
-  if (options.development) {
-    return createDevServer(options);
-  } else {
-    return createProdServer(options);
-  }
+  const page = new Response(htmlContent, {
+    headers: { "Content-Type": "text/html" },
+  });
+  return page;
 }
 
-function createProdServer<Req extends Request, S>(
-  options: ServerOptions,
-): ServerFunctions<Req, S> {
-  const publicOutputDir = path.join(options.outputDir ?? "./dist", "public");
-  if (options.publicDir) {
-    cpSync(options.publicDir, publicOutputDir, { recursive: true });
-  } else {
-    mkdirSync(publicOutputDir, { recursive: true });
-  }
+export function ssr(component: SSRComponent) {
+  return (req: BunRequest) => {
+    const vnode = h(component, { req });
+    const htmlContent = renderToString(vnode);
 
-  const prerender = (page: Component) => {
-    const vnode = componentToVNode(page);
-    const htmlContent = renderToString(vnode, {});
-    const filepath = path.join(
-      publicOutputDir,
-      Bun.randomUUIDv7("base64url") + ".html",
-    );
-    writeFileSync(filepath, htmlContent);
-
-    return new Response(Bun.file(filepath), {
+    const result = new Response(htmlContent, {
       headers: { "Content-Type": "text/html" },
     });
+    return result;
   };
-
-  const ssr = <Req extends Request, S>(page: Component) => {
-    const handler: Serve.Handler<Req, S, Response> = (req, server) => {
-      const stream = renderToReadableStream(componentToVNode(page), {
-        req,
-        server,
-      });
-      return new Response(stream, {
-        headers: { "Content-Type": "text/html" },
-      });
-    };
-    return handler;
-  };
-
-  const staticFile = (filepath: string): Response => {
-    const fullFilepath = path.join(publicOutputDir, filepath);
-    return new Response(Bun.file(fullFilepath));
-  };
-
-  return { prerender, ssr, staticFile };
 }
 
-function createDevServer<Req extends Request, S>(
-  options: ServerOptions,
-): ServerFunctions<Req, S> {
-  const publicDir = options.publicDir ?? "./public";
-
-  const prerender = (page: Component) => {
-    const htmlContent = renderToString(componentToVNode(page), {});
-    return new Response(htmlContent, {
-      headers: { "Content-Type": "text/html" },
-    });
-  };
-
-  const ssr = <Req extends Request, S>(page: Component) => {
-    const handler: Serve.Handler<Req, S, Response> = (req, server) => {
-      const stream = renderToReadableStream(componentToVNode(page), {
-        req,
-        server,
-      });
-      return new Response(stream, {
-        headers: { "Content-Type": "text/html" },
-      });
-    };
-    return handler;
-  };
-
-  const staticFile = (filepath: string): Response => {
-    const fullFilepath = path.join(publicDir, filepath);
-    return new Response(Bun.file(fullFilepath));
-  };
-
-  return { prerender, ssr, staticFile };
-}
-
-function componentToVNode(component: Component): VNode<Attributes> {
-  const vnodes = component();
-  const vnode = Array.isArray(vnodes) ? vnodes[0] : vnodes;
-  if (!vnode) throw new Error("Component rendered to nothing");
-  return vnode;
+export function staticFile(filepath: string, publicDir: string): Response {
+  const fullFilepath = join(publicDir, filepath);
+  return new Response(Bun.file(fullFilepath));
 }

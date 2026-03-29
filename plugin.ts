@@ -3,23 +3,7 @@ import { type BunPlugin } from "bun";
 import { h } from "preact";
 import { renderToStringAsync } from "preact-render-to-string";
 import fs from "fs";
-import path from "path";
-
-const DIST_PUBLIC_DIR = "./dist/public";
-
-export const myPlugin: BunPlugin = {
-  name: "Custom Import Modifier",
-  setup(build) {
-    build.onLoad({ filter: /message/ }, async (args) => {
-      let exports = { ...require(args.path) };
-      exports["message"] = "Modified by plugin!";
-      return {
-        exports,
-        loader: "object",
-      };
-    });
-  },
-};
+import path from "node:path";
 
 export const pagesPlugin: BunPlugin = {
   name: "Pages Prerenderer",

@@ -1,4 +1,4 @@
-import Profile from "../components/profile";
+import Profile from "../components/Profile";
 import { lazy, Suspense } from "preact/compat";
 
 const ProfilePicture = lazy(() => import("./ProfilePicture"));
