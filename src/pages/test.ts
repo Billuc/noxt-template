@@ -12,9 +12,7 @@ export default function Page() {
         This page is server-rendered. The counter below is an interactive
         island.
       </p>
-      <div data-island="Counter" data-props=${JSON.stringify({ start: 3 })}>
-        <${Counter} start="3" />
-      </div>
+      <${Counter} start="3" />
     </div>
   `;
 }

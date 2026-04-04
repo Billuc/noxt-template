@@ -1,14 +1,17 @@
 import { join, extname, basename, dirname, relative } from "node:path";
-import { mkdir, readdir } from "node:fs/promises";
+import { mkdir, readdir, rm } from "node:fs/promises";
 import { renderToString } from "preact-render-to-string";
 import { h } from "preact";
 import type { BunPlugin } from "bun";
 import { writeFile } from "node:fs/promises";
+import { copyFile } from "node:fs/promises";
 
 const DIST = join(process.cwd(), "dist");
-const DIST_TMP = join(DIST, ".tmp");
-const ISLANDS_OUTDIR = join(DIST, "_static", "islands");
-const ENTRIES_OUTDIR = join(DIST_TMP, "entries");
+const CACHE = join(process.cwd(), ".cache");
+const SOURCE_PUBLIC = join(process.cwd(), "public");
+const DIST_PUBLIC = join(DIST, "public");
+const ISLANDS_OUTDIR = join(DIST, "public", "_islands");
+const ENTRIES_OUTDIR = join(CACHE, "entries");
 const ISLANDS_DIR = join(process.cwd(), "src", "islands");
 const PAGES_DIR = join(process.cwd(), "src", "pages");
 
@@ -74,7 +77,7 @@ export async function buildIslands() {
     format: "esm",
     minify: true,
   });
-  console.log("Island building result:", res);
+  console.log("Islands built");
 }
 
 async function discoverIslands() {
@@ -96,7 +99,7 @@ async function writeOut(route: string, html: string) {
 
 export async function prerenderPages() {
   await ensureDir(DIST);
-  await ensureDir(DIST_TMP);
+  await ensureDir(CACHE);
   const files = await readdir(PAGES_DIR, { recursive: true });
 
   for (const file of files) {
@@ -107,8 +110,9 @@ export async function prerenderPages() {
 
     const buildArtifacts = await Bun.build({
       entrypoints: [filePath],
-      outdir: DIST_TMP,
+      outdir: CACHE,
       plugins: [islandPrerenderPlugin],
+      external: ["preact", "preact/hooks", "htm"],
     });
     if (!buildArtifacts.success) {
       console.error(`Error prerendering page ${file}`, buildArtifacts.logs);
@@ -131,13 +135,14 @@ const islandPrerenderPlugin: BunPlugin = {
   name: "Island Prerender Plugin",
   target: "bun",
   setup: (build) => {
-    build.onLoad({ filter: /^.*src\/islands\/.*\.[jt]sx?/ }, (args) => {
-      console.log("Loading island at ", args.path);
-      const filename = basename(args.path);
-      const islandData = getIslandData(filename);
-      return {
-        loader: "js",
-        contents: `
+    build.onLoad(
+      { filter: /.*[\/\\]src[\/\\]islands[\/\\].*\.[jt]sx?/ },
+      (args) => {
+        const filename = basename(args.path);
+        const islandData = getIslandData(filename);
+        return {
+          loader: "js",
+          contents: `
                 import { h } from "preact";
                 import htm from "htm";
                 const html = htm.bind(h);
@@ -152,7 +157,19 @@ const islandPrerenderPlugin: BunPlugin = {
                     \`;
                 }
             `,
-      };
-    });
+        };
+      },
+    );
   },
 };
+
+export async function cleanDistFolder() {
+  await rm(DIST, { force: true, recursive: true });
+}
+
+export async function copyPublicFolder() {
+  const publicFiles = await readdir(SOURCE_PUBLIC);
+  for (const file of publicFiles) {
+    await copyFile(join(SOURCE_PUBLIC, file), join(DIST_PUBLIC, file));
+  }
+}
