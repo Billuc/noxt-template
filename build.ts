@@ -1,12 +1,12 @@
-import { pagesPlugin } from "./archive/plugin";
+import { buildIslands, prerenderPages } from "./utils/build";
 
-const result = await Bun.build({
-  entrypoints: ["./index.ts"],
-  outdir: "./dist",
-  plugins: [pagesPlugin],
-});
-
-if (!result.success) {
-  console.error("Build failed:", result.logs);
-  process.exit(1);
+async function run() {
+  await buildIslands();
+  await prerenderPages();
+  console.log("Build complete.");
 }
+
+run().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

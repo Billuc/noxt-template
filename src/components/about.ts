@@ -1,10 +1,10 @@
-import Profile from "../components/Profile";
+import Profile from "./Profile";
 import { lazy, Suspense } from "preact/compat";
 import { type BunRequest } from "bun";
 import htm from "htm";
 import { h } from "preact";
 
-const ProfilePicture = lazy(() => import("../components/ProfilePicture"));
+const ProfilePicture = lazy(() => import("./ProfilePicture"));
 const html = htm.bind(h);
 
 interface Props {
