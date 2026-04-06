@@ -1,21 +1,18 @@
-import {
-  buildIslands,
-  cleanDistFolder,
-  copyPublicFolder,
-  generatePages,
-  generateServer,
-} from "./utils/build";
+import { join } from "node:path";
+import { cleanDistFolder, pagePrerenderPlugin } from "./utils/build";
 
-async function run() {
+async function build() {
   await cleanDistFolder();
-  await buildIslands();
-  const pages = await generatePages();
-  await copyPublicFolder();
-  await generateServer(pages);
+  await Bun.build({
+    entrypoints: ["./index.ts"],
+    plugins: [pagePrerenderPlugin],
+    outdir: join(__dirname, "dist"),
+    target: "bun",
+  });
   console.log("Build complete.");
 }
 
-run().catch((err) => {
+build().catch((err) => {
   console.error(err);
   process.exit(1);
 });
