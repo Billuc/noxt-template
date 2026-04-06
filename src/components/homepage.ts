@@ -1,7 +1,4 @@
-import { h } from "preact";
-import htm from "htm";
-
-const html = htm.bind(h);
+import { html } from "htm/preact";
 
 export default function HomePage() {
   return html`

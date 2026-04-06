@@ -1,8 +1,5 @@
+import { html } from "htm/preact";
 import { useState } from "preact/hooks";
-import { h } from "preact";
-import htm from "htm";
-
-const html = htm.bind(h);
 
 export default function Counter({ start = 0 }) {
   let [value, setValue] = useState(start);

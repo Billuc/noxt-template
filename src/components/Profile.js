@@ -1,8 +1,5 @@
-import htm from "htm";
-import { h } from "preact";
+import { html } from "htm/preact";
 import ProfilePicture from "./ProfilePicture";
-
-const html = htm.bind(h);
 
 export default function Profile() {
   return html`

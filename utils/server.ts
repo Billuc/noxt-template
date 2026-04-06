@@ -5,9 +5,18 @@ import type { Attributes, ComponentType } from "preact";
 import { h } from "preact";
 import { renderToStringAsync } from "preact-render-to-string";
 import { importPath } from "./path";
+import { html } from "htm/preact";
 
 const htmlHeaders = new Headers();
 htmlHeaders.append("Content-Type", "text/html; charset=utf-8");
+
+const imports = {
+  imports: {
+    preact: "https://esm.sh/preact@10.23.1",
+    "preact/": "https://esm.sh/preact@10.23.1/",
+    "htm/preact": "https://esm.sh/htm@3.1.1/preact?external=preact",
+  },
+};
 
 export function deduceMime(path: string) {
   const ext = extname(path).toLowerCase();
@@ -84,7 +93,7 @@ export async function render<Props extends Attributes = Attributes>(
   return result;
 }
 
-export async function servePage(htmlPage: Bun.HTMLBundle) {
+export async function preparePage(htmlPage: Bun.HTMLBundle) {
   const htmlContent = await Bun.file(htmlPage.index).arrayBuffer();
   const rewriter = new HTMLRewriter();
   rewriter.on("[data-component]", {
@@ -97,7 +106,9 @@ export async function servePage(htmlPage: Bun.HTMLBundle) {
           componentSrc,
           htmlPage.index,
         );
-        el.after(`<script>${scriptContent}</script>`, { html: true });
+        el.after(`<script type="module">${scriptContent}</script>`, {
+          html: true,
+        });
       } else {
         const dataProps = el.getAttribute("data-props") ?? "{}";
         const props = JSON.parse(dataProps);
@@ -111,32 +122,48 @@ export async function servePage(htmlPage: Bun.HTMLBundle) {
       }
     },
   });
+  rewriter.on("head", {
+    element: (el) => {
+      el.append(
+        `<script type="importmap">${JSON.stringify(imports)}</script>`,
+        { html: true },
+      );
+      el.append('<script type="module" src="/assets/render.js"></script>', {
+        html: true,
+      });
+    },
+  });
   const result = rewriter.transform(htmlContent);
   return new Response(result as ArrayBuffer);
 }
 
 async function generateIslandScript(componentSrc: string, htmlPath: string) {
   const content = `
-        import { hydrate, h } from 'preact';
-        import Island from '${importPath(htmlPath, componentSrc)}';
-        function hydrateAll(){
-            for (const el of document.querySelectorAll('[data-component="${componentSrc}"]')){
-                try{ 
-                    const props = JSON.parse(el.dataset.props ?? "{}");
-                    hydrate(h(Island, props), el);
-                } catch(e){
-                    console.error('Failed to hydrate ${componentSrc}\\n',e)
-                }
-            }
-        }
-        if (typeof window !== 'undefined') hydrateAll();
+    import Island from '${importPath(htmlPath, componentSrc)}';
+    window.hydrate("${componentSrc}", Island);
     `;
   const island = await Bun.build({
     entrypoints: ["index.ts"],
     files: { "index.ts": content },
-    outdir: join(process.cwd(), ".cache"),
     target: "browser",
+    external: ["preact", "preact/*", "htm/preact"],
   });
   const script = island.outputs[0]?.text();
   return script;
+}
+
+export async function asIsland(componentPath: string, importedFrom: string) {
+  const scriptContent = await generateIslandScript(componentPath, importedFrom);
+  return (props: any) => {
+    return html`
+      <div
+        data-component="${componentPath}"
+        data-props=${JSON.stringify(props)}
+      ></div>
+      <script
+        type="module"
+        dangerouslySetInnerHTML=${{ __html: scriptContent }}
+      />
+    `;
+  };
 }

@@ -1,19 +1,18 @@
 import AboutPage from "./src/components/aboutpage";
 import homepage from "./src/pages/prerender.html";
 import islandPage from "./src/pages/island.html";
-import { servePage, serveStatic, render } from "./utils/server";
-
-const prerenderedHomepage = await servePage(homepage);
-const prerenderedIslandPage = await servePage(islandPage);
+import hybridPage from "./src/pages/hybrid.html";
+import { preparePage, serveStatic, render } from "./utils/server";
 
 const server = Bun.serve({
   port: 3000,
   routes: {
-    "/prerender": prerenderedHomepage,
+    "/prerender": await preparePage(homepage),
     "/ssr": (req) => {
       return render(AboutPage, { req });
     },
-    "/island": prerenderedIslandPage,
+    "/island": await preparePage(islandPage),
+    "/hybrid": await preparePage(hybridPage),
     "/assets/:path": serveStatic("./src/assets", "/assets/"),
   },
   development: Bun.env.DEV === "true",

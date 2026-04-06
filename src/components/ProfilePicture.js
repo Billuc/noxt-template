@@ -1,7 +1,4 @@
-import htm from "htm";
-import { h } from "preact";
-
-const html = htm.bind(h);
+import { html } from "htm/preact";
 
 export default function ProfilePicture() {
   return html`<img

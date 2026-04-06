@@ -1,9 +1,6 @@
 import Profile from "../components/Profile";
 import { type BunRequest } from "bun";
-import htm from "htm";
-import { h } from "preact";
-
-const html = htm.bind(h);
+import { html } from "htm/preact";
 
 interface Props {
   req: BunRequest;
