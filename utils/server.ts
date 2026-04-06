@@ -4,6 +4,7 @@ import { extname, join } from "node:path";
 import type { Attributes, ComponentType } from "preact";
 import { h } from "preact";
 import { renderToStringAsync } from "preact-render-to-string";
+import { importPath } from "./path";
 
 const htmlHeaders = new Headers();
 htmlHeaders.append("Content-Type", "text/html; charset=utf-8");
@@ -41,14 +42,15 @@ export function deduceMime(path: string) {
 export function tryServeStatic<Rq extends Request>(
   req: Rq,
   folderpath: string,
+  prefix: string,
 ): Response | null {
   const url = new URL(req.url);
   const pathname = url.pathname;
-  const sanitizedPathname = pathname.startsWith("/")
-    ? pathname.slice(1)
-    : pathname;
+
+  if (!pathname.startsWith(prefix)) return null;
+
+  const sanitizedPathname = pathname.slice(prefix.length);
   const fullPath = join(folderpath, sanitizedPathname);
-  console.log(fullPath);
 
   if (!existsSync(fullPath)) return null;
 
@@ -60,15 +62,16 @@ export function tryServeStatic<Rq extends Request>(
 
 export function serveStatic<P extends string, S>(
   folderpath: string,
+  prefix: string,
 ): Bun.Serve.Handler<BunRequest<P>, S, Response> {
   return (req: BunRequest<P>, server: S): Response => {
-    const response = tryServeStatic(req, folderpath);
+    const response = tryServeStatic(req, folderpath, prefix);
     if (!response) return new Response("File not found", { status: 404 });
     return response;
   };
 }
 
-export async function render<Props extends Attributes>(
+export async function render<Props extends Attributes = Attributes>(
   page: ComponentType<Props>,
   props: Props,
 ) {
@@ -79,4 +82,61 @@ export async function render<Props extends Attributes>(
     headers: htmlHeaders,
   });
   return result;
+}
+
+export async function servePage(htmlPage: Bun.HTMLBundle) {
+  const htmlContent = await Bun.file(htmlPage.index).arrayBuffer();
+  const rewriter = new HTMLRewriter();
+  rewriter.on("[data-component]", {
+    element: async (el) => {
+      const componentSrc = el.getAttribute("data-component")!;
+      const isIsland = el.getAttribute("data-isisland") === "true";
+
+      if (isIsland) {
+        const scriptContent = await generateIslandScript(
+          componentSrc,
+          htmlPage.index,
+        );
+        el.after(`<script>${scriptContent}</script>`, { html: true });
+      } else {
+        const dataProps = el.getAttribute("data-props") ?? "{}";
+        const props = JSON.parse(dataProps);
+        const component = await import(
+          importPath(htmlPage.index, componentSrc)
+        );
+        const componentHtml = await renderToStringAsync(
+          h(component.default, props, []),
+        );
+        el.append(componentHtml, { html: true });
+      }
+    },
+  });
+  const result = rewriter.transform(htmlContent);
+  return new Response(result as ArrayBuffer);
+}
+
+async function generateIslandScript(componentSrc: string, htmlPath: string) {
+  const content = `
+        import { hydrate, h } from 'preact';
+        import Island from '${importPath(htmlPath, componentSrc)}';
+        function hydrateAll(){
+            for (const el of document.querySelectorAll('[data-component="${componentSrc}"]')){
+                try{ 
+                    const props = JSON.parse(el.dataset.props ?? "{}");
+                    hydrate(h(Island, props), el);
+                } catch(e){
+                    console.error('Failed to hydrate ${componentSrc}\\n',e)
+                }
+            }
+        }
+        if (typeof window !== 'undefined') hydrateAll();
+    `;
+  const island = await Bun.build({
+    entrypoints: ["index.ts"],
+    files: { "index.ts": content },
+    outdir: join(process.cwd(), ".cache"),
+    target: "browser",
+  });
+  const script = island.outputs[0]?.text();
+  return script;
 }

@@ -1,18 +1,22 @@
-// Minimal Bun dev server using a routes mapping and auto-building island clients for dev
-import { buildIslands } from "./utils/build.js";
-import { render, serveStatic } from "./utils/server.js";
-import HomePage from "./src2/pages/index.js";
-import TestPage from "./src2/pages/test.js";
+import AboutPage from "./src/components/aboutpage";
+import homepage from "./src/pages/prerender.html";
+import islandPage from "./src/pages/island.html";
+import { servePage, serveStatic, render } from "./utils/server";
 
-await buildIslands();
+const prerenderedHomepage = await servePage(homepage);
+const prerenderedIslandPage = await servePage(islandPage);
 
 const server = Bun.serve({
   port: 3000,
   routes: {
-    "/index": render(HomePage, {}),
-    "/test": render(TestPage, {}),
-    "/public/*": serveStatic("./public"),
+    "/prerender": prerenderedHomepage,
+    "/ssr": (req) => {
+      return render(AboutPage, { req });
+    },
+    "/island": prerenderedIslandPage,
+    "/assets/:path": serveStatic("./src/assets", "/assets/"),
   },
+  development: Bun.env.DEV === "true",
 });
 
 console.log("Dev server running on http://localhost:3000");

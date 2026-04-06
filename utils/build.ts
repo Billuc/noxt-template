@@ -5,7 +5,6 @@ import { h } from "preact";
 import type { BunPlugin } from "bun";
 import { writeFile } from "node:fs/promises";
 import { copyFile } from "node:fs/promises";
-import { flattenDiagnosticMessageText } from "typescript";
 
 const DIST = join(process.cwd(), "dist");
 const CACHE = join(process.cwd(), ".cache");
