@@ -5,6 +5,7 @@ import { h } from "preact";
 import type { BunPlugin } from "bun";
 import { writeFile } from "node:fs/promises";
 import { copyFile } from "node:fs/promises";
+import { flattenDiagnosticMessageText } from "typescript";
 
 const DIST = join(process.cwd(), "dist");
 const CACHE = join(process.cwd(), ".cache");
@@ -12,8 +13,10 @@ const SOURCE_PUBLIC = join(process.cwd(), "public");
 const DIST_PUBLIC = join(DIST, "public");
 const ISLANDS_OUTDIR = join(DIST, "public", "_islands");
 const ENTRIES_OUTDIR = join(CACHE, "entries");
+const PAGES_OUTDIR = join(CACHE, "pages");
 const ISLANDS_DIR = join(process.cwd(), "src", "islands");
 const PAGES_DIR = join(process.cwd(), "src", "pages");
+const UTILS_SERVER = join(process.cwd(), "utils", "server.ts");
 
 const JS_TS_EXTENSIONS = [".js", ".jsx", ".ts", ".tsx"];
 
@@ -90,45 +93,13 @@ async function discoverIslands() {
   }
 }
 
-async function writeOut(route: string, html: string) {
+async function writeOut(route: string, html: string): Promise<string> {
   const outDir = join(DIST, dirname(route));
   const filename = `${basename(route)}.html`;
   await ensureDir(outDir);
-  await writeFile(join(outDir, filename), html, "utf8");
-}
-
-export async function prerenderPages() {
-  await ensureDir(DIST);
-  await ensureDir(CACHE);
-  const files = await readdir(PAGES_DIR, { recursive: true });
-
-  for (const file of files) {
-    const extension = extname(file);
-    if (!JS_TS_EXTENSIONS.includes(extension)) continue;
-    const route = file.slice(0, -extension.length);
-    const filePath = join(PAGES_DIR, file);
-
-    const buildArtifacts = await Bun.build({
-      entrypoints: [filePath],
-      outdir: CACHE,
-      plugins: [islandPrerenderPlugin],
-      external: ["preact", "preact/hooks", "htm"],
-    });
-    if (!buildArtifacts.success) {
-      console.error(`Error prerendering page ${file}`, buildArtifacts.logs);
-      continue;
-    }
-    const mod = await import(buildArtifacts.outputs[0]!.path);
-
-    if (!mod.default) {
-      console.error(`Page ${file} does not have a default export !`);
-      continue;
-    }
-
-    const html = renderToString(h(mod.default, {}));
-    await writeOut(route, html);
-    console.log(`Page ${file} correctly prerendered !`);
-  }
+  const filepath = join(outDir, filename);
+  await writeFile(filepath, html, "utf8");
+  return filepath;
 }
 
 const islandPrerenderPlugin: BunPlugin = {
@@ -153,7 +124,7 @@ const islandPrerenderPlugin: BunPlugin = {
                     }
                     return html\`
                         <div data-island="${islandData!.name}" ...\$\{args\}></div>
-                        <script type="module" src="/_static/islands/${islandData!.name}.client.js"></script>
+                        <script type="module" src="/public/_islands/${islandData!.name}.client.js"></script>
                     \`;
                 }
             `,
@@ -172,4 +143,97 @@ export async function copyPublicFolder() {
   for (const file of publicFiles) {
     await copyFile(join(SOURCE_PUBLIC, file), join(DIST_PUBLIC, file));
   }
+}
+
+type PageDetails = { prerendered: boolean; path: string };
+export type Pages = Record<string, PageDetails>;
+
+export async function generatePages(): Promise<Pages> {
+  await ensureDir(DIST);
+  await ensureDir(PAGES_OUTDIR);
+  const files = await readdir(PAGES_DIR, { recursive: true });
+  const result: Pages = {};
+
+  for (const file of files) {
+    const extension = extname(file);
+    if (!JS_TS_EXTENSIONS.includes(extension)) continue;
+    const route = file.slice(0, -extension.length);
+    const filePath = join(PAGES_DIR, file);
+
+    const buildArtifacts = await Bun.build({
+      entrypoints: [filePath],
+      outdir: PAGES_OUTDIR,
+      plugins: [islandPrerenderPlugin],
+      external: ["preact", "preact/hooks", "htm"],
+    });
+    if (!buildArtifacts.success) {
+      console.error(`Error prerendering page ${file}`, buildArtifacts.logs);
+      continue;
+    }
+    const mod = await import(buildArtifacts.outputs[0]!.path);
+
+    if (!mod.default) {
+      console.error(`Page ${file} does not have a default export !`);
+      continue;
+    }
+    if (mod.prerender) {
+      const html = renderToString(h(mod.default, {}));
+      const output = await writeOut(route, html);
+      console.log(`Page ${route} correctly prerendered !`);
+      result[route] = { prerendered: true, path: output };
+    } else {
+      console.log(`Prepared page ${route}`);
+      result[route] = {
+        prerendered: false,
+        path: buildArtifacts.outputs[0]!.path,
+      };
+    }
+  }
+
+  return result;
+}
+
+async function generateServerCode(pages: Pages) {
+  const codeLines = [];
+  const routes = Object.entries(pages);
+  codeLines.push(
+    `import { serveStatic, render } from "${UTILS_SERVER.replaceAll("\\", "\\\\")}"`,
+  );
+  for (const [route, details] of routes) {
+    const path = details.path.replaceAll("\\", "\\\\");
+    codeLines.push(`import ${route} from "${path}";`);
+  }
+
+  codeLines.push("Bun.serve({ port: 3000, routes: {");
+
+  for (const [route, details] of routes) {
+    let routeData = `async req => await render(${route}, { req })`;
+    if (details.prerendered) {
+      const path = details.path.replaceAll("\\", "\\\\");
+      routeData = `new Response(await Bun.file("${path}").bytes())`;
+    }
+
+    if (route === "index") codeLines.push(`"/": ${routeData},`);
+    codeLines.push(`"/${route}": ${routeData},`);
+  }
+
+  codeLines.push(
+    `"/public/*": serveStatic("${DIST_PUBLIC.replaceAll("\\", "\\\\")}")`,
+  );
+
+  codeLines.push("}})");
+  codeLines.push('console.log("Dev server running on http://localhost:3000");');
+  const code = codeLines.join("\n");
+
+  await ensureDir(CACHE);
+  await writeFile(join(CACHE, "index.ts"), code);
+}
+
+export async function generateServer(pages: Pages) {
+  await generateServerCode(pages);
+  await Bun.build({
+    entrypoints: [join(CACHE, "index.ts")],
+    outdir: DIST,
+    packages: "external",
+  });
 }

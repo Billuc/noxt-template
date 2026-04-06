@@ -1,6 +1,6 @@
 import { prerender, ssr, staticFile } from "./server2.ts";
-import AboutPage from "../src/components/about.js";
-import HomePage from "../src/pages/index.js";
+import AboutPage from "../src2/components/about.js";
+import HomePage from "../src2/pages/index.js";
 
 const PORT = 3000;
 const isDev = Bun.env.MODE !== "production";

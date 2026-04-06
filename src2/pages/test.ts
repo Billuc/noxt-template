@@ -4,7 +4,9 @@ import htm from "htm";
 
 const html = htm.bind(h);
 
-export default function Page() {
+export const prerender = true;
+
+export default function TestPage() {
   return html`
     <div>
       <h1>Welcome to Bun + Preact islands MVP</h1>

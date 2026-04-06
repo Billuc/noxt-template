@@ -2,14 +2,16 @@ import {
   buildIslands,
   cleanDistFolder,
   copyPublicFolder,
-  prerenderPages,
+  generatePages,
+  generateServer,
 } from "./utils/build";
 
 async function run() {
   await cleanDistFolder();
   await buildIslands();
-  await prerenderPages();
+  const pages = await generatePages();
   await copyPublicFolder();
+  await generateServer(pages);
   console.log("Build complete.");
 }
 
