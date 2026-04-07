@@ -80,9 +80,9 @@ export function serveStatic<P extends string, S>(
   };
 }
 
-export async function render<Props extends Attributes = Attributes>(
+export async function render<Props>(
   page: ComponentType<Props>,
-  props: Props,
+  props: Attributes & Props,
 ) {
   const vnode = h(page, props, []);
   const body = await renderToStringAsync(vnode);
@@ -94,7 +94,7 @@ export async function render<Props extends Attributes = Attributes>(
 }
 
 export async function preparePage(htmlPage: Bun.HTMLBundle) {
-  const htmlContent = await Bun.file(htmlPage.index).arrayBuffer();
+  const htmlContent = await Bun.file(htmlPage.index).text();
   const rewriter = new HTMLRewriter();
   rewriter.on("[data-component]", {
     element: async (el) => {
@@ -134,7 +134,7 @@ export async function preparePage(htmlPage: Bun.HTMLBundle) {
     },
   });
   const result = rewriter.transform(htmlContent);
-  return new Response(result as ArrayBuffer);
+  return new Response(result);
 }
 
 async function generateIslandScript(componentSrc: string, htmlPath: string) {
