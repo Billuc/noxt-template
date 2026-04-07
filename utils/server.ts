@@ -5,7 +5,7 @@ import type { Attributes, ComponentType } from "preact";
 import { h } from "preact";
 import { renderToStringAsync } from "preact-render-to-string";
 import { importPath } from "./path";
-import { html } from "htm/preact";
+import { generateIslandScript } from "./islands";
 
 const htmlHeaders = new Headers();
 htmlHeaders.append("Content-Type", "text/html; charset=utf-8");
@@ -93,8 +93,8 @@ export async function render<Props>(
   return result;
 }
 
-export async function preparePage(htmlPage: Bun.HTMLBundle) {
-  const htmlContent = await Bun.file(htmlPage.index).text();
+export async function rewritePage(path: string): Promise<string> {
+  const htmlContent = await Bun.file(path).text();
   const rewriter = new HTMLRewriter();
   rewriter.on("[data-component]", {
     element: async (el) => {
@@ -102,19 +102,20 @@ export async function preparePage(htmlPage: Bun.HTMLBundle) {
       const isIsland = el.getAttribute("data-isisland") === "true";
 
       if (isIsland) {
-        const scriptContent = await generateIslandScript(
-          componentSrc,
-          htmlPage.index,
-        );
+        console.log("Preparing island at", componentSrc);
+
+        const scriptContent = await generateIslandScript(componentSrc, path);
         el.after(`<script type="module">${scriptContent}</script>`, {
           html: true,
         });
       } else {
+        console.log("Prerendering component at", componentSrc);
+
         const dataProps = el.getAttribute("data-props") ?? "{}";
         const props = JSON.parse(dataProps);
-        const component = await import(
-          importPath(htmlPage.index, componentSrc)
-        );
+        console.log("before import ", importPath(path, componentSrc));
+        const component = await import(importPath(path, componentSrc));
+        console.log("after import");
         const componentHtml = await renderToStringAsync(
           h(component.default, props, []),
         );
@@ -134,36 +135,10 @@ export async function preparePage(htmlPage: Bun.HTMLBundle) {
     },
   });
   const result = rewriter.transform(htmlContent);
+  return result;
+}
+
+export async function preparePage(htmlPage: Bun.HTMLBundle) {
+  const result = await rewritePage(htmlPage.index);
   return new Response(result);
-}
-
-async function generateIslandScript(componentSrc: string, htmlPath: string) {
-  const content = `
-    import Island from '${importPath(htmlPath, componentSrc)}';
-    window.hydrate("${componentSrc}", Island);
-    `;
-  const island = await Bun.build({
-    entrypoints: ["index.ts"],
-    files: { "index.ts": content },
-    target: "browser",
-    external: ["preact", "preact/*", "htm/preact"],
-  });
-  const script = island.outputs[0]?.text();
-  return script;
-}
-
-export async function asIsland(componentPath: string, importedFrom: string) {
-  const scriptContent = await generateIslandScript(componentPath, importedFrom);
-  return (props: any) => {
-    return html`
-      <div
-        data-component="${componentPath}"
-        data-props=${JSON.stringify(props)}
-      ></div>
-      <script
-        type="module"
-        dangerouslySetInnerHTML=${{ __html: scriptContent }}
-      />
-    `;
-  };
 }

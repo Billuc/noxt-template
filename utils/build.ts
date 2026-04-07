@@ -1,9 +1,9 @@
-import { join, basename } from "node:path";
+import { join, basename, dirname } from "node:path";
 import { mkdir, readdir, rm } from "node:fs/promises";
 import type { BunPlugin } from "bun";
 import { writeFile } from "node:fs/promises";
 import { copyFile } from "node:fs/promises";
-import { preparePage } from "./server";
+import { preparePage, rewritePage } from "./server";
 
 const DIST = join(process.cwd(), "dist");
 const SOURCE_PUBLIC = join(process.cwd(), "public");
@@ -17,23 +17,28 @@ export const pagePrerenderPlugin: BunPlugin = {
   name: "Page Prerender Plugin",
   setup: (build) => {
     build.onResolve({ filter: /.*\.html/ }, async (args) => {
-      const htmlBundle: Bun.HTMLBundle = {
-        index: args.path,
-      };
-      const htmlResponse = await preparePage(htmlBundle);
-      const newHtml = await htmlResponse.text();
-      console.log(newHtml);
-      const newPath = join(DIST, basename(args.path));
-      await writeFile(newPath, newHtml);
-      return {
-        path: newPath,
-      };
+      const fullPath = join(dirname(args.importer), args.path);
+      try {
+        console.log("Preparing page at ", fullPath);
+        const htmlContent = await rewritePage(fullPath);
+        console.log("Got new content for ", fullPath);
+        const newPath = join(DIST, basename(args.path));
+        await writeFile(newPath, htmlContent);
+        console.log("New file written for ", fullPath);
+        return {
+          path: newPath,
+        };
+      } catch (err) {
+        console.error(err);
+        return { path: fullPath };
+      }
     });
   },
 };
 
 export async function cleanDistFolder() {
   await rm(DIST, { force: true, recursive: true });
+  await ensureDir(DIST);
 }
 
 export async function copyPublicFolder() {

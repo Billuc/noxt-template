@@ -8,6 +8,9 @@ async function build() {
     plugins: [pagePrerenderPlugin],
     outdir: join(__dirname, "dist"),
     target: "bun",
+    define: {
+      BUILDING: "false",
+    },
   });
   console.log("Build complete.");
 }
