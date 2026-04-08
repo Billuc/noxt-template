@@ -3,11 +3,8 @@ import { mkdir, readdir, rm } from "node:fs/promises";
 import type { BunPlugin } from "bun";
 import { writeFile } from "node:fs/promises";
 import { copyFile } from "node:fs/promises";
-import { preparePage, rewritePage } from "./server";
-
-const DIST = join(process.cwd(), "dist");
-const SOURCE_PUBLIC = join(process.cwd(), "public");
-const DIST_PUBLIC = join(DIST, "public");
+import { rewritePage } from "./pages";
+import { CACHE, DIST, DIST_PUBLIC, ROOT, SOURCE_PUBLIC } from "./paths";
 
 async function ensureDir(path: string) {
   await mkdir(path, { recursive: true });
@@ -16,6 +13,8 @@ async function ensureDir(path: string) {
 export const pagePrerenderPlugin: BunPlugin = {
   name: "Page Prerender Plugin",
   setup: (build) => {
+    ensureDir(CACHE);
+
     build.onResolve({ filter: /.*\.html/ }, async (args) => {
       const fullPath = join(dirname(args.importer), args.path);
       try {
@@ -38,12 +37,37 @@ export const pagePrerenderPlugin: BunPlugin = {
 
 export async function cleanDistFolder() {
   await rm(DIST, { force: true, recursive: true });
-  await ensureDir(DIST);
 }
 
 export async function copyPublicFolder() {
   const publicFiles = await readdir(SOURCE_PUBLIC);
   for (const file of publicFiles) {
     await copyFile(join(SOURCE_PUBLIC, file), join(DIST_PUBLIC, file));
+  }
+}
+
+export async function prerenderPages() {
+  await ensureDir(DIST);
+
+  const indexFile = Bun.file(join(ROOT, "index.ts"));
+  const transpiler = new Bun.Transpiler({
+    treeShaking: true,
+    trimUnusedImports: true,
+    allowBunRuntime: true,
+  });
+  const imports = transpiler.scanImports(await indexFile.arrayBuffer());
+
+  for (const i of imports) {
+    const ifullPath = join(ROOT, i.path);
+    if (!ifullPath.startsWith(ROOT)) continue;
+    if (!ifullPath.endsWith(".html")) continue;
+
+    const file = Bun.file(ifullPath);
+    if (!(await file.exists())) continue;
+
+    console.log("Prerendering page ", i.path);
+
+    const prerenderedHtml = await rewritePage(ifullPath);
+    await writeFile(join(DIST, basename(ifullPath)), prerenderedHtml);
   }
 }

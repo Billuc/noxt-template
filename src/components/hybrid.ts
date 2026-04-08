@@ -1,5 +1,5 @@
 import { html } from "htm/preact";
-import { asIsland } from "../../utils/islands";
+import { asIsland } from "../../utils/server";
 
 const CounterIsland = await asIsland("./Counter", __filename);
 

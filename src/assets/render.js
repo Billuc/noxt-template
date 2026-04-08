@@ -10,7 +10,7 @@ window.hydrate = (componentSrc, Component) => {
       const props = JSON.parse(el.dataset.props ?? "{}");
       render(html`<${Component} ...${props} />`, el);
     } catch (e) {
-      console.error("Failed to hydrate ${componentSrc}\\n", e);
+      console.error(`Failed to hydrate ${componentSrc}\n`, e);
     }
   }
 };

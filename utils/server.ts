@@ -4,19 +4,12 @@ import { extname, join } from "node:path";
 import type { Attributes, ComponentType } from "preact";
 import { h } from "preact";
 import { renderToStringAsync } from "preact-render-to-string";
-import { importPath } from "./path";
-import { generateIslandScript } from "./islands";
+import { rewritePage } from "./pages";
+import { generateIslandScript, getScriptVNode } from "./islands";
+import { html } from "htm/preact";
 
 const htmlHeaders = new Headers();
 htmlHeaders.append("Content-Type", "text/html; charset=utf-8");
-
-const imports = {
-  imports: {
-    preact: "https://esm.sh/preact@10.23.1",
-    "preact/": "https://esm.sh/preact@10.23.1/",
-    "htm/preact": "https://esm.sh/htm@3.1.1/preact?external=preact",
-  },
-};
 
 export function deduceMime(path: string) {
   const ext = extname(path).toLowerCase();
@@ -93,52 +86,24 @@ export async function render<Props>(
   return result;
 }
 
-export async function rewritePage(path: string): Promise<string> {
-  const htmlContent = await Bun.file(path).text();
-  const rewriter = new HTMLRewriter();
-  rewriter.on("[data-component]", {
-    element: async (el) => {
-      const componentSrc = el.getAttribute("data-component")!;
-      const isIsland = el.getAttribute("data-isisland") === "true";
-
-      if (isIsland) {
-        console.log("Preparing island at", componentSrc);
-
-        const scriptContent = await generateIslandScript(componentSrc, path);
-        el.after(`<script type="module">${scriptContent}</script>`, {
-          html: true,
-        });
-      } else {
-        console.log("Prerendering component at", componentSrc);
-
-        const dataProps = el.getAttribute("data-props") ?? "{}";
-        const props = JSON.parse(dataProps);
-        console.log("before import ", importPath(path, componentSrc));
-        const component = await import(importPath(path, componentSrc));
-        console.log("after import");
-        const componentHtml = await renderToStringAsync(
-          h(component.default, props, []),
-        );
-        el.append(componentHtml, { html: true });
-      }
-    },
-  });
-  rewriter.on("head", {
-    element: (el) => {
-      el.append(
-        `<script type="importmap">${JSON.stringify(imports)}</script>`,
-        { html: true },
-      );
-      el.append('<script type="module" src="/assets/render.js"></script>', {
-        html: true,
-      });
-    },
-  });
-  const result = rewriter.transform(htmlContent);
-  return result;
-}
-
 export async function preparePage(htmlPage: Bun.HTMLBundle) {
   const result = await rewritePage(htmlPage.index);
   return new Response(result);
+}
+
+export async function asIsland(componentPath: string, importedFrom: string) {
+  const scriptData = await generateIslandScript(componentPath, importedFrom);
+  const scriptVNode = getScriptVNode(scriptData);
+
+  return (props: any) => {
+    return [
+      html`
+        <div
+          data-component="${scriptData.identifier}"
+          data-props=${JSON.stringify(props)}
+        ></div>
+      `,
+      scriptVNode,
+    ];
+  };
 }

@@ -1,16 +1,22 @@
 import { join } from "node:path";
-import { cleanDistFolder, pagePrerenderPlugin } from "./utils/build";
+import {
+  cleanDistFolder,
+  copyPublicFolder,
+  pagePrerenderPlugin,
+  prerenderPages,
+} from "./utils/build";
+import { DIST } from "./utils/paths";
 
 async function build() {
   await cleanDistFolder();
+  await prerenderPages();
+  await copyPublicFolder();
+
   await Bun.build({
     entrypoints: ["./index.ts"],
     plugins: [pagePrerenderPlugin],
-    outdir: join(__dirname, "dist"),
+    outdir: DIST,
     target: "bun",
-    define: {
-      BUILDING: "false",
-    },
   });
   console.log("Build complete.");
 }
