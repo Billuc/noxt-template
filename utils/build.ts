@@ -4,7 +4,14 @@ import type { BunPlugin } from "bun";
 import { writeFile } from "node:fs/promises";
 import { copyFile } from "node:fs/promises";
 import { rewritePage } from "./pages";
-import { CACHE, DIST, DIST_PUBLIC, ROOT, SOURCE_PUBLIC } from "./paths";
+import {
+  CACHE,
+  CACHE_PUBLIC,
+  DIST,
+  DIST_PUBLIC,
+  ROOT,
+  SOURCE_PUBLIC,
+} from "./paths";
 
 async function ensureDir(path: string) {
   await mkdir(path, { recursive: true });
@@ -13,24 +20,11 @@ async function ensureDir(path: string) {
 export const pagePrerenderPlugin: BunPlugin = {
   name: "Page Prerender Plugin",
   setup: (build) => {
-    ensureDir(CACHE);
-
     build.onResolve({ filter: /.*\.html/ }, async (args) => {
-      const fullPath = join(dirname(args.importer), args.path);
-      try {
-        console.log("Preparing page at ", fullPath);
-        const htmlContent = await rewritePage(fullPath);
-        console.log("Got new content for ", fullPath);
-        const newPath = join(DIST, basename(args.path));
-        await writeFile(newPath, htmlContent);
-        console.log("New file written for ", fullPath);
-        return {
-          path: newPath,
-        };
-      } catch (err) {
-        console.error(err);
-        return { path: fullPath };
-      }
+      const newPath = join(CACHE, args.path);
+      return {
+        path: newPath,
+      };
     });
   },
 };
@@ -40,14 +34,15 @@ export async function cleanDistFolder() {
 }
 
 export async function copyPublicFolder() {
+  await ensureDir(CACHE_PUBLIC);
   const publicFiles = await readdir(SOURCE_PUBLIC);
   for (const file of publicFiles) {
-    await copyFile(join(SOURCE_PUBLIC, file), join(DIST_PUBLIC, file));
+    await copyFile(join(SOURCE_PUBLIC, file), join(CACHE_PUBLIC, file));
   }
 }
 
 export async function prerenderPages() {
-  await ensureDir(DIST);
+  await ensureDir(CACHE);
 
   const indexFile = Bun.file(join(ROOT, "index.ts"));
   const transpiler = new Bun.Transpiler({
@@ -68,6 +63,8 @@ export async function prerenderPages() {
     console.log("Prerendering page ", i.path);
 
     const prerenderedHtml = await rewritePage(ifullPath);
-    await writeFile(join(DIST, basename(ifullPath)), prerenderedHtml);
+    const outpath = join(CACHE, i.path);
+    await ensureDir(dirname(outpath));
+    await writeFile(outpath, prerenderedHtml);
   }
 }

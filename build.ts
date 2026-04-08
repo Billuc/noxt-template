@@ -9,8 +9,8 @@ import { DIST } from "./utils/paths";
 
 async function build() {
   await cleanDistFolder();
-  await prerenderPages();
   await copyPublicFolder();
+  await prerenderPages();
 
   await Bun.build({
     entrypoints: ["./index.ts"],

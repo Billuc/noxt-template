@@ -1,5 +1,5 @@
-import { join, relative } from "node:path";
-import { DIST, DIST_PUBLIC, importPath } from "./paths";
+import { dirname, join, relative } from "node:path";
+import { CACHE, CACHE_PUBLIC, importPath, ROOT } from "./paths";
 import { h, type VNode } from "preact";
 
 const hasher = new Bun.CryptoHasher("sha256");
@@ -55,7 +55,7 @@ async function prepareIslandAsset(
 
   const hash = hasher.update(fullPath).digest("base64url");
   const identifier = hash + ".js";
-  const outpath = join(DIST_PUBLIC, identifier);
+  const outpath = join(CACHE_PUBLIC, identifier);
   const file = Bun.file(outpath);
 
   if (!(await file.exists())) {
@@ -69,16 +69,24 @@ async function prepareIslandAsset(
       files: { "index.ts": content },
       target: "browser",
       external: ["preact", "preact/*", "htm/preact"],
-      outdir: DIST_PUBLIC,
+      outdir: CACHE_PUBLIC,
       naming: identifier,
     });
   }
 
   return {
     type: "src",
-    src: relative(DIST, outpath),
+    src: relativeSrc(htmlPath, identifier),
     identifier,
   };
+}
+
+function relativeSrc(pagePath: string, fileName: string) {
+  return join(
+    relative(dirname(pagePath), ROOT),
+    relative(CACHE, CACHE_PUBLIC),
+    fileName,
+  );
 }
 
 export function getScriptVNode(data: ScriptData): VNode<any> {

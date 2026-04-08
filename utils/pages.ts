@@ -48,7 +48,7 @@ export async function rewritePage(path: string): Promise<string> {
         `<script type="importmap">${JSON.stringify(importMap)}</script>`,
         { html: true },
       );
-      el.append('<script type="module" src="/assets/render.js"></script>', {
+      el.append('<script type="module" src="../assets/render.js"></script>', {
         html: true,
       });
     },
