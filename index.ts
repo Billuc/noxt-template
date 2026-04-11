@@ -1,22 +1,16 @@
-import AboutPage from "./src/components/aboutpage";
-import homepage from "./src/pages/prerender.html";
-import islandPage from "./src/pages/island.html";
-import hybridPage from "./src/pages/hybrid.html";
-import { preparePage, serveStatic, render } from "./utils/server";
+import { prepareImportMap, serverRender } from "@lib/server";
+import SSR from "./src/components/SSR";
+import { MODE, PORT } from "@lib/env";
 
-const server = Bun.serve({
-  port: 3000,
+const importMap = await prepareImportMap();
+
+Bun.serve({
+  port: PORT,
   routes: {
-    "/prerender": await preparePage(homepage),
-    "/ssr": (req) => {
-      return render(AboutPage, { req });
-    },
-    "/island": await preparePage(islandPage),
-    "/hybrid": await preparePage(hybridPage),
-    "/assets/:path": serveStatic("./src/assets", "/assets/"),
+    ...importMap,
+    "/ssr": (req) => serverRender(SSR, { req }),
   },
-  development: Bun.env.DEV === "true",
+  development: MODE === "development",
 });
 
-console.log("Dev server running on http://localhost:3000");
-export default server;
+console.log("Server running on http://localhost:" + PORT);

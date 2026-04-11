@@ -1,8 +1,7 @@
-import { defineIsland } from "@lib/island";
 import { html } from "htm/preact";
 import { useState } from "preact/hooks";
 
-function Counter({ start = 0 }) {
+export default function Counter({ start = 0 }) {
   let [value, setValue] = useState(start);
 
   return html`
@@ -13,5 +12,3 @@ function Counter({ start = 0 }) {
     </div>
   `;
 }
-
-export default defineIsland(Counter, import.meta.path);
