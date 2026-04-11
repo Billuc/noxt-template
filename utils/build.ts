@@ -1,17 +1,10 @@
-import { join, basename, dirname } from "node:path";
+import { join, dirname } from "node:path";
 import { mkdir, readdir, rm } from "node:fs/promises";
 import type { BunPlugin } from "bun";
 import { writeFile } from "node:fs/promises";
 import { copyFile } from "node:fs/promises";
 import { rewritePage } from "./pages";
-import {
-  CACHE,
-  CACHE_PUBLIC,
-  DIST,
-  DIST_PUBLIC,
-  ROOT,
-  SOURCE_PUBLIC,
-} from "./paths";
+import { CACHE, CACHE_PUBLIC, DIST, ROOT, SOURCE_PUBLIC } from "./paths";
 
 async function ensureDir(path: string) {
   await mkdir(path, { recursive: true });

@@ -1,4 +1,3 @@
-import { join } from "node:path";
 import {
   cleanDistFolder,
   copyPublicFolder,
@@ -17,6 +16,7 @@ async function build() {
     plugins: [pagePrerenderPlugin],
     outdir: DIST,
     target: "bun",
+    external: ["preact", "preact/*", "htm/preact"],
   });
   console.log("Build complete.");
 }

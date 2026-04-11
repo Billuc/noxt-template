@@ -88,7 +88,7 @@ export async function render<Props>(
 
 export async function preparePage(htmlPage: Bun.HTMLBundle) {
   const result = await rewritePage(htmlPage.index);
-  return new Response(result);
+  return new Response(result, { headers: htmlHeaders });
 }
 
 export async function asIsland(componentPath: string, importedFrom: string) {
