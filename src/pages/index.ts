@@ -81,22 +81,22 @@ export default function Exhibition() {
                 title="Counter Island"
                 description="A simple counter demonstrating client-side interactivity with server-rendered initial state:"
                 code=${`import { defineIsland } from "@lib/island";
-                import { html } from "htm/preact";
-                import { useState } from "preact/hooks";
-                
-                function Counter({ start = 0 }) {
-                  let [value, setValue] = useState(start);
-                
-                  return html\`
-                    <div>
-                      <button class="dec" onClick=\${() => setValue(value - 1)}>-</button>
-                      <span class="value">\${value}</span>
-                      <button class="inc" onClick=\${() => setValue(value + 1)}>+</button>
-                    </div>
-                  \`;
-                }
-                
-                export default defineIsland(Counter, import.meta.path);`}
+import { html } from "htm/preact";
+import { useState } from "preact/hooks";
+
+function Counter({ start = 0 }) {
+  let [value, setValue] = useState(start);
+
+  return html\`
+    <div>
+      <button class="dec" onClick=\${() => setValue(value - 1)}>-</button>
+      <span class="value">\${value}</span>
+      <button class="inc" onClick=\${() => setValue(value + 1)}>+</button>
+    </div>
+  \`;
+}
+
+export default defineIsland(Counter, import.meta.path);`}
               >
                 <div class="counter-container">
                   <${CounterIsland} start=${10} />
@@ -108,26 +108,26 @@ export default function Exhibition() {
                 title="Hello Island"
                 description="An interactive greeting component with two-way data binding:"
                 code=${`import { useState } from "preact/hooks";
-                import { html } from "htm/preact";
-                import { defineIsland } from "@lib/island";
-                
-                function Hello() {
-                  const [name, setName] = useState("World");
-                
-                  return html\`
-                    <div>
-                      <span>This is an interactive island !</span>
-                      <h2>Hello, \${name}!</h2>
-                      <input
-                        type="text"
-                        value=\${name}
-                        onInput=\${(e: Event) => setName((e.target as HTMLInputElement).value)}
-                      />
-                    </div>
-                  \`;
-                }
-                
-                export default defineIsland(Hello, import.meta.path);`}
+import { html } from "htm/preact";
+import { defineIsland } from "@lib/island";
+
+function Hello() {
+  const [name, setName] = useState("World");
+
+  return html\`
+    <div>
+      <span>This is an interactive island !</span>
+      <h2>Hello, \${name}!</h2>
+      <input
+        type="text"
+        value=\${name}
+        onInput=\${(e: Event) => setName((e.target as HTMLInputElement).value)}
+      />
+    </div>
+  \`;
+}
+
+export default defineIsland(Hello, import.meta.path);`}
               >
                 <${HelloIsland} />
               </${DemoSection}>
@@ -166,7 +166,7 @@ export default function Exhibition() {
 
               <div class="features-grid">
                 <${FeatureCard} icon="📁" title="Project Structure">
-                  <pre class="code-block" style="margin-top: 1rem;">
+                    <pre class="code-block" style="margin-top: 1rem;">
 src/
 ├── pages/          # Page components
 ├── components/     # Reusable components
@@ -176,7 +176,7 @@ lib/
 ├── server.ts       # Server rendering logic
 ├── island.ts       # Island hydration
 └── manifest.ts     # Build manifest</pre>
-                </${FeatureCard}>
+                </${FeatureCard}> 
 
                 <${FeatureCard} icon="📦" title="Key Dependencies">
                   <ul style="line-height: 1.8; margin-top: 1rem;">

@@ -23,7 +23,10 @@ export default function DemoSection({
       </div>
       <p>${description}</p>
       <div class="demo-content">${children}</div>
-      ${code ? html`<div class="code-block"><code>${code}</code></div>` : ""}
+      ${code ? html`<details class="code-details">
+        <summary class="code-summary">View Code</summary>
+        <div class="code-block"><code>${code}</code></div>
+      </details>` : ""}
     </div>
   `;
 }
