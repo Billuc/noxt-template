@@ -6,7 +6,7 @@ function Hello() {
   const [name, setName] = useState("World");
 
   return html`
-    <div>
+    <div class="hello-demo">
       <span>This is an interactive island !</span>
       <h2>Hello, ${name}!</h2>
       <input
