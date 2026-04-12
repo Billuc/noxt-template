@@ -1,6 +1,6 @@
 import { prepareManifest } from "./manifest";
 import { rm } from "node:fs/promises";
-import { DIST, INDEX } from "./paths";
+import { CACHE_DIR, DIST, INDEX } from "./paths";
 
 const importMapPlugin: Bun.BunPlugin = {
   name: "import-map-plugin",
@@ -36,6 +36,7 @@ const importMapPlugin: Bun.BunPlugin = {
   },
 };
 
+await rm(CACHE_DIR, { recursive: true, force: true });
 await rm(DIST, { recursive: true, force: true });
 await Bun.build({
   entrypoints: [INDEX],

@@ -15,10 +15,6 @@ async function prepareIslandScript(
   const islandScriptPath = path.resolve(CACHE_ASSETS_DIR, `${hash}.js`);
   const renderScriptPath = path.join(__dirname, "render.ts");
 
-  if (await Bun.file(islandScriptPath).exists()) {
-    return islandScriptPath;
-  }
-
   const script = `
     import { renderComponent } from ${JSON.stringify(renderScriptPath)};
     import Island from ${JSON.stringify(fullPath)};

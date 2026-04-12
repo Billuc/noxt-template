@@ -4,11 +4,9 @@ import { renderToString } from "preact-render-to-string";
 import {
   ASSETS_DIR,
   CACHE_ASSETS_DIR,
-  CACHE_DIR,
   CACHE_PAGES_DIR,
   PAGES_DIR,
 } from "./paths";
-import { rm } from "fs/promises";
 
 async function prerenderPage(
   pathFromPages: string,
@@ -48,7 +46,6 @@ async function copyAssets() {
 }
 
 export async function prepareManifest(): Promise<Record<string, string>> {
-  await rm(CACHE_DIR, { recursive: true, force: true });
   await copyAssets();
   const manifest: Record<string, string> = {};
   const glob = new Bun.Glob("**/*.{tsx,ts,jsx,js}");
