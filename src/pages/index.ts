@@ -31,6 +31,7 @@ export default function Exhibition() {
             <div class="hero-buttons">
               <${Button} href="#demos" variant="primary" icon="🎯">View Demos</${Button}>
               <${Button} href="#features" variant="secondary" icon="⚡">Learn More</${Button}>
+              <${Button} href="#getting-started" variant="secondary" icon="🚀">Get Started</${Button}>
             </div>
           </header>
 
@@ -158,12 +159,31 @@ export default defineIsland(Hello, import.meta.path);`}
 
             <div class="divider"></div>
 
-            <section>
+            <section id="getting-started">
               <h2>🔧 Technical Details</h2>
 
               <div class="features-grid">
+                <${FeatureCard} icon="🚀" title="Getting Started">
+                  <p>
+                    To start using Noxt, you can delete everything in the <code>src</code> folder.
+                    Then create page components in 
+                    <code>src/pages</code> and use <code>defineIsland</code> and
+                    <code>asIsland</code> to convert interactive
+                    components.
+                  </p>
+                </${FeatureCard}>
+
+                <${FeatureCard} icon="⚙️" title="Commands">
+                  <ul>
+                    <li><code>bun install</code> — Install dependencies.</li>
+                    <li><code>bun dev</code> — Start the development server with hot reload.</li>
+                    <li><code>bun run build</code> — Bundle the project for production.</li>
+                    <li><code>bun preview</code> — Preview the bundled project.</li>
+                  </ul>
+                </${FeatureCard}>
+
                 <${FeatureCard} icon="📁" title="Project Structure">
-                    <pre class="code-block" style="margin-top: 1rem;">
+                    <pre class="code-block">
 src/
 ├── pages/          # Page components
 ├── components/     # Reusable components
@@ -176,7 +196,7 @@ lib/
                 </${FeatureCard}> 
 
                 <${FeatureCard} icon="📦" title="Key Dependencies">
-                  <ul style="line-height: 1.8; margin-top: 1rem;">
+                  <ul>
                     <li>
                       <strong>Bun</strong> - Fast JavaScript runtime and server
                     </li>
@@ -186,15 +206,6 @@ lib/
                     <li><strong>HTM</strong> - Hyperscript Tagged Markup</li>
                     <li><strong>Preact Render to String</strong> - SSR</li>
                   </ul>
-                </${FeatureCard}>
-
-                <${FeatureCard} icon="🚀" title="Getting Started">
-                  <p>
-                    To use this metaframework, create page components in 
-                    <code>src/pages</code> and use the
-                    <code>asIsland</code> function to convert interactive
-                    components.
-                  </p>
                 </${FeatureCard}>
               </div>
             </section>

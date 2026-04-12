@@ -139,11 +139,6 @@ h2 {
   color: #e0e0e0;
 }
 
-.feature-card p {
-  color: #b0b0b0;
-  line-height: 1.6;
-}
-
 /* Demo Sections */
 .island-demo {
   background: rgba(255, 255, 255, 0.05);
