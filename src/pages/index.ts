@@ -26,7 +26,7 @@ export default function Exhibition() {
             <h1>🌃 Noxt: Bun + Preact Metaframework</h1>
             <p class="subtitle">
               A modern metaframework that combines server-side rendering with
-              interactive islands for optimal performance
+              interactive islands for optimal performance and small bundle size
             </p>
             <div class="hero-buttons">
               <${Button} href="#demos" variant="primary" icon="🎯">View Demos</${Button}>
