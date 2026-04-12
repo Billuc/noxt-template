@@ -173,7 +173,7 @@ export default defineIsland(Hello, import.meta.path);`}
                   </p>
                 </${FeatureCard}>
 
-                <${FeatureCard} icon="⚙️" title="Commands">
+                <${FeatureCard} icon="🛠️" title="Commands">
                   <ul>
                     <li><code>bun install</code> — Install dependencies.</li>
                     <li><code>bun dev</code> — Start the development server with hot reload.</li>
