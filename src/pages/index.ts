@@ -179,6 +179,7 @@ export default defineIsland(Hello, import.meta.path);`}
                     <li><code>bun dev</code> — Start the development server with hot reload.</li>
                     <li><code>bun run build</code> — Bundle the project for production.</li>
                     <li><code>bun preview</code> — Preview the bundled project.</li>
+                    <li><code>bun prerender</code> — Prerender a static project (no SSR or routes).</li>
                   </ul>
                 </${FeatureCard}>
 

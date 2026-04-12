@@ -105,3 +105,4 @@ Supported environment variables:
 - `bun dev` — Start the development server with hot reload.
 - `bun run build` — Bundle the project for production.
 - `bun preview` — Preview the bundled project.
+- `bun prerender` — Prerender a static project (no SSR or routes).

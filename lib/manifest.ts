@@ -1,5 +1,5 @@
 import path, { join } from "path";
-import { symlink } from "fs/promises";
+import { mkdir, symlink } from "fs/promises";
 import { h } from "preact";
 import { renderToString } from "preact-render-to-string";
 import {
@@ -36,6 +36,7 @@ async function prerenderPage(
 }
 
 async function copyAssets() {
+  await mkdir(CACHE_ASSETS_DIR, { recursive: true });
   const glob = new Bun.Glob("**/*");
 
   for await (const file of glob.scan(ASSETS_DIR)) {

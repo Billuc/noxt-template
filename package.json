@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "bun run --hot ./index.ts",
     "build": "bun run ./lib/build.ts",
-    "preview": "cd dist && bun run ./index.js"
+    "preview": "cd dist && bun run ./index.js",
+    "prerender": "bun run ./lib/prerender.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"
