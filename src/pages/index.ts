@@ -66,6 +66,11 @@ export default function Exhibition() {
                   Only interactive components are hydrated, significantly
                   reducing client-side JavaScript execution time.
                 </${FeatureCard}>
+
+                <${FeatureCard} icon="⬇️" title="Small bundle size">
+                  Combining server-side prerendering and interactive islands gives
+                  much smaller client payloads by bundling only the interactive parts.
+                </${FeatureCard}>
               </div>
             </section>
 
@@ -214,8 +219,8 @@ lib/
 
           <footer>
             <p style="margin-bottom: 1rem;">
-              <strong>🌃 Noxt: Bun + Preact Metaframework</strong> | Built with ❤️ using
-              modern web technologies
+              <strong>🌃 Noxt: Bun + Preact Metaframework</strong> | Built with ❤️ by
+              <a style="color: inherit; margin-left: 0.3rem;" href="https://billuc.github.io">Luc Billaud</a>.
             </p>
             <p style="font-size: 0.9rem; color: #999;">
               © 2026 | Inspired by Next.js, Astro, and other modern frameworks

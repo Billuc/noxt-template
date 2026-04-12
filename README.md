@@ -8,6 +8,7 @@ A high-performance web server built with [Bun](https://bun.com), a fast all-in-o
 - **Zero-config Setup**: Get started quickly with minimal configuration
 - **TypeScript Support**: Full TypeScript support out of the box
 - **Fast Execution**: Native performance with near-instant startup times
+- **Small bundle size**: Small bundle sizes and client-side JS execution times thanks to prerendering
 
 ## Getting Started
 
@@ -106,3 +107,17 @@ Supported environment variables:
 - `bun run build` — Bundle the project for production.
 - `bun preview` — Preview the bundled project.
 - `bun prerender` — Prerender a static project (no SSR or routes).
+
+## Bundle Size
+
+Noxt is built to minimize client-side JavaScript. By combining server-side rendering with selective, per-component hydration (interactive "islands"), Noxt avoids shipping and rehydrating a full client runtime like many SPA frameworks do. The practical benefits:
+
+- **Much smaller client payloads:** Hydrate only what's interactive, not the whole page.
+- **Faster load and render:** Less bytes over the network and less JS to parse/execute improves First Contentful Paint and Time to Interactive.
+- **Lower bandwidth & CPU costs:** Smaller payloads reduce data transfer and battery/CPU use on low-end devices.
+
+How Noxt achieves this and how to keep bundles small:
+
+- **Islands over full-page hydration:** Use `defineIsland` and `asIsland` so only interactive parts are hydrated on the client while the rest is prerendered.
+- **Prefer lightweight libraries:** Preact + HTM are intentionally small compared to heavier alternatives like React.
+- **Code-split islands & dynamic imports:** Load optional features only when needed.
