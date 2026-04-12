@@ -63,11 +63,6 @@ export default function Exhibition() {
                   Only interactive components are hydrated, significantly
                   reducing client-side JavaScript execution time.
                 </${FeatureCard}>
-
-                <${FeatureCard} icon="📱" title="Responsive Design">
-                  Built with mobile-first principles and responsive components
-                  that work seamlessly across all devices.
-                </${FeatureCard}>
               </div>
             </section>
 

@@ -1,4 +1,5 @@
 import path, { join } from "path";
+import { symlink } from "fs/promises";
 import { h } from "preact";
 import { renderToString } from "preact-render-to-string";
 import {
@@ -41,7 +42,13 @@ async function copyAssets() {
     const srcPath = join(ASSETS_DIR, file);
     const destPath = join(CACHE_ASSETS_DIR, file);
 
-    await Bun.write(Bun.file(destPath), Bun.file(srcPath));
+    try {
+      await symlink(srcPath, destPath);
+    } catch (e: any) {
+      if (e.code !== "EEXIST") {
+        throw e;
+      }
+    }
   }
 }
 
