@@ -18,7 +18,7 @@ export default function Exhibition() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="stylesheet" href="../assets/styles.css" />
         <link rel="stylesheet" href="../assets/prism.css" />
-        <script src="../assets/prism.js" />
+        <script src="../assets/prism.js"></script>
       </head>
       <body>
         <div class="container">

@@ -17,7 +17,8 @@ import path from "path";
 import { h, type Attributes, type ComponentType } from "preact";
 import { CACHE_ASSETS_DIR, relativeFromRoot } from "./paths";
 import { html } from "htm/preact";
-import { getIslandPath, type IslandComponent } from "./island";
+import { useRef, useEffect } from "preact/hooks";
+import { defineIsland, getIslandPath, type IslandComponent } from "./island";
 import { renderToStringAsync } from "preact-render-to-string";
 import { prepareImportMap as prepareIM } from "./import_map";
 
@@ -85,3 +86,33 @@ export async function serverRender<Props>(
   });
   return result;
 }
+
+interface ServerComponentProps {
+  action: string;
+  method?: string;
+  body?: BodyInit | null;
+  headers?: HeadersInit;
+  loading?: ComponentType<{}>;
+}
+
+function _ServerComponent(props: ServerComponentProps) {
+  const ref = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    fetch(props.action, {
+      method: props.method,
+      body: props.body,
+      headers: props.headers,
+    })
+      .then((res) => res.text())
+      .then((htmlBody) => {
+        if (ref.current) {
+          ref.current.innerHTML = htmlBody;
+        }
+      });
+  }, []);
+
+  return html`<div ref=${ref}><${props.loading} /></div>`;
+}
+
+export const ServerComponent = defineIsland(_ServerComponent, import.meta.path);
