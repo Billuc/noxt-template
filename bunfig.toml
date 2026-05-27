@@ -1,0 +1,2 @@
+[aliases]
+noxt = "./node_modules/noxt/index.ts"

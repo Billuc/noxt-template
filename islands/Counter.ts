@@ -1,4 +1,4 @@
-import { defineIsland } from "@lib/island";
+import { defineIsland } from "noxt";
 import { html } from "htm/preact";
 import { useState } from "preact/hooks";
 

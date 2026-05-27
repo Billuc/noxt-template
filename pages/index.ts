@@ -1,13 +1,13 @@
 import { html } from "htm/preact";
-import { asIsland } from "@lib/server";
-import Counter from "../components/Counter";
-import Hello from "../components/Hello";
+import { prepareIsland } from "noxt";
+import Counter from "../islands/Counter";
+import Hello from "../islands/Hello";
 import FeatureCard from "../components/FeatureCard";
 import DemoSection from "../components/DemoSection";
 import Button from "../components/Button";
 
-const CounterIsland = await asIsland(Counter);
-const HelloIsland = await asIsland(Hello);
+const CounterIsland = await prepareIsland(Counter);
+const HelloIsland = await prepareIsland(Hello);
 
 export default function Exhibition() {
   return html`
@@ -83,7 +83,7 @@ export default function Exhibition() {
                 icon="🔢"
                 title="Counter Island"
                 description="A simple counter demonstrating client-side interactivity with server-rendered initial state:"
-                code=${`import { defineIsland } from "@lib/island";
+                code=${`import { defineIsland } from "noxt";
 import { html } from "htm/preact";
 import { useState } from "preact/hooks";
 
@@ -112,7 +112,7 @@ export default defineIsland(Counter, import.meta.path);`}
                 description="An interactive greeting component with two-way data binding:"
                 code=${`import { useState } from "preact/hooks";
 import { html } from "htm/preact";
-import { defineIsland } from "@lib/island";
+import { defineIsland } from "noxt";
 
 function Hello() {
   const [name, setName] = useState("World");

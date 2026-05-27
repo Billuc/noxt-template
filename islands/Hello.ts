@@ -1,6 +1,6 @@
 import { useState } from "preact/hooks";
 import { html } from "htm/preact";
-import { defineIsland } from "@lib/island";
+import { defineIsland } from "noxt";
 
 function Hello() {
   const [name, setName] = useState("World");
