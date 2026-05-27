@@ -3,7 +3,7 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "dev": "bun run --watch ./index.ts",
+    "dev": "MODE=development bun run --watch ./index.ts",
     "build": "bun build --target=bun --outdir=dist index.ts",
     "preview": "cd dist && bun run ./index.js"
   },
