@@ -5,6 +5,9 @@ import Hello from "../islands/Hello";
 import FeatureCard from "../components/FeatureCard";
 import DemoSection from "../components/DemoSection";
 import Button from "../components/Button";
+import stylesUrl from "../assets/styles.css" with { type: "file" };
+import prismCssUrl from "../assets/prism.css" with { type: "file" };
+import prismJsUrl from "../assets/prism.js" with { type: "file" };
 
 const CounterIsland = await prepareIsland(Counter);
 const HelloIsland = await prepareIsland(Hello);
@@ -16,9 +19,9 @@ export default function Exhibition() {
         <title>🌃 Noxt: Bun + Preact Metaframework</title>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="stylesheet" href="../assets/styles.css" />
-        <link rel="stylesheet" href="../assets/prism.css" />
-        <script src="../assets/prism.js"></script>
+        <link rel="stylesheet" href="${stylesUrl}" />
+        <link rel="stylesheet" href="${prismCssUrl}" />
+        <script src="${prismJsUrl}"></script>
       </head>
       <body>
         <div class="container">
