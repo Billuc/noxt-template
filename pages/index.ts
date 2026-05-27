@@ -145,22 +145,22 @@ export default defineIsland(Hello, import.meta.path);`}
               <h2>📚 How It Works</h2>
 
               <div class="features-grid">
-                <${FeatureCard} icon="🖥️" title="Server Rendering">
-                  Pages are rendered to HTML on the server using Preact's
-                  render-to-string functionality, providing fast initial page
-                  loads and excellent SEO performance.
+                <${FeatureCard} icon="🖥️" title="Prerendering">
+                  <code>prepareRoutes()</code> scans <code>pages/</code> at
+                  build time, prerenders each page to static HTML via Preact's
+                  SSR, and generates a route map for <code>Bun.serve()</code>.
                 </${FeatureCard}>
 
                 <${FeatureCard} icon="🔌" title="Island Hydration">
-                  Interactive components are marked as "islands" and only
-                  these specific components are hydrated on the client side,
-                  reducing JavaScript bundle size.
+                  <code>defineIsland</code> marks a component for client-side
+                  hydration. <code>prepareIsland</code> generates a script that
+                  ships only the interactive parts — the rest stays static HTML.
                 </${FeatureCard}>
 
-                <${FeatureCard} icon="⚡" title="Bun Server">
-                  The Bun runtime provides a fast HTTP server and JavaScript
-                  runtime that's compatible with both server and browser
-                  environments.
+                <${FeatureCard} icon="⚡" title="Bun Macros">
+                  <code>prepareRoutes</code> is a Bun macro (<code>with { type: "macro" }</code>)
+                  that runs at build time. No runtime overhead, no framework CLI — just
+                  standard Bun commands.
                 </${FeatureCard}>
               </div>
             </section>
@@ -173,47 +173,41 @@ export default defineIsland(Hello, import.meta.path);`}
               <div class="features-grid">
                 <${FeatureCard} icon="🚀" title="Getting Started">
                   <p>
-                    To start using Noxt, you can delete everything in the <code>src</code> folder.
-                    Then create page components in 
-                    <code>src/pages</code> and use <code>defineIsland</code> and
-                    <code>asIsland</code> to convert interactive
-                    components.
+                    Create page components in <code>pages/</code> and island
+                    components in <code>islands/</code>. Use <code>defineIsland</code>
+                    to mark interactive components and <code>prepareIsland</code>
+                    to use them in pages.
                   </p>
                 </${FeatureCard}>
 
                 <${FeatureCard} icon="🛠️" title="Commands">
                   <ul>
                     <li><code>bun install</code> — Install dependencies.</li>
-                    <li><code>bun dev</code> — Start the development server with hot reload.</li>
-                    <li><code>bun run build</code> — Bundle the project for production.</li>
-                    <li><code>bun preview</code> — Preview the bundled project.</li>
-                    <li><code>bun prerender</code> — Prerender a static project (no SSR or routes).</li>
+                    <li><code>bun run index.ts</code> — Start the development server.</li>
+                    <li><code>bun build --target=bun --outdir=dist index.ts</code> — Build for production.</li>
+                    <li><code>cd dist && bun run index.js</code> — Preview the bundled project.</li>
                   </ul>
                 </${FeatureCard}>
 
                 <${FeatureCard} icon="📁" title="Project Structure">
                     <pre class="code-block">
-src/
-├── pages/          # Page components
-├── components/     # Reusable components
-└── assets/         # Static assets
-
-lib/
-├── server.ts       # Server rendering logic
-├── island.ts       # Island hydration
-└── manifest.ts     # Build manifest</pre>
+pages/           # Page components (one per route)
+├── index.ts     # Route: /
+islands/         # Interactive island components
+├── Counter.ts
+├── Hello.ts
+components/      # Reusable non-island components
+assets/          # Static assets
+index.ts         # Server entry point</pre>
                 </${FeatureCard}> 
 
                 <${FeatureCard} icon="📦" title="Key Dependencies">
                   <ul>
                     <li>
-                      <strong>Bun</strong> - Fast JavaScript runtime and server
+                      <strong>Bun</strong> — JavaScript runtime and HTTP server
                     </li>
-                    <li>
-                      <strong>Preact</strong> - Lightweight React alternative
-                    </li>
-                    <li><strong>HTM</strong> - Hyperscript Tagged Markup</li>
-                    <li><strong>Preact Render to String</strong> - SSR</li>
+                    <li><strong>Preact</strong> — Lightweight React alternative</li>
+                    <li><strong>HTM</strong> — Hyperscript Tagged Markup</li>
                   </ul>
                 </${FeatureCard}>
               </div>
