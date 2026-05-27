@@ -26,10 +26,6 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
 
-    "types": ["bun"],
-    "paths": {
-      "noxt": ["./node_modules/noxt/index.ts"],
-      "noxt/macro": ["./node_modules/noxt/index.macro.ts"]
-    }
+    "types": ["bun"]
   }
 }
