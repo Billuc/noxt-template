@@ -26,7 +26,7 @@ export default function Exhibition() {
       <body>
         <div class="container">
           <header>
-            <h1>🌃 Noxt: Bun + Preact Metaframework</h1>
+            <h1>Noxt: Bun + Preact Metaframework</h1>
             <p class="subtitle">
               A modern metaframework that combines server-side rendering with
               interactive islands for optimal performance and small bundle size

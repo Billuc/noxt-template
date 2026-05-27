@@ -1,27 +1,51 @@
 @keyframes grid-scroll {
-  0% { background-position: 0 0; }
-  100% { background-position: 0 60px; }
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 0 60px;
+  }
 }
 
 @keyframes glow-pulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 @keyframes border-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 @keyframes float {
-  0%, 100% { translate: 0 0; }
-  50% { translate: 0 -6px; }
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -6px;
+  }
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
 }
 
 * {
@@ -31,7 +55,12 @@
 }
 
 body {
-  font-family: "Inter", "SF Pro", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    "Inter",
+    "SF Pro",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   line-height: 1.6;
   color: #e0e0e0;
   background: #0a0a0f;
@@ -94,7 +123,12 @@ header::before {
   translate: -50% 0;
   width: 700px;
   height: 700px;
-  background: radial-gradient(circle, #a855f720 0%, #06b6d420 40%, transparent 65%);
+  background: radial-gradient(
+    circle,
+    #a855f720 0%,
+    #06b6d420 40%,
+    transparent 65%
+  );
   pointer-events: none;
 }
 
@@ -105,12 +139,23 @@ h1 {
   line-height: 1.1;
   letter-spacing: -0.03em;
   position: relative;
-  background: linear-gradient(135deg, #f0f0f0 0%, #a78bfa 40%, #22d3ee 70%, #a78bfa 100%);
+  background: linear-gradient(
+    135deg,
+    #f0f0f0 0%,
+    #a78bfa 40%,
+    #22d3ee 70%,
+    #a78bfa 100%
+  );
   background-size: 200% auto;
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: shimmer 6s linear infinite;
+}
+
+h1::before {
+  content: "🌃";
+  -webkit-text-fill-color: initial;
 }
 
 .subtitle {
@@ -150,12 +195,16 @@ h1 {
   background: linear-gradient(135deg, #7c3aed, #06b6d4);
   color: white;
   border: none;
-  box-shadow: 0 0 20px #7c3aed40, 0 0 60px #06b6d420;
+  box-shadow:
+    0 0 20px #7c3aed40,
+    0 0 60px #06b6d420;
 }
 
 .btn-primary:hover {
   scale: 1.05;
-  box-shadow: 0 0 30px #7c3aed60, 0 0 80px #06b6d430;
+  box-shadow:
+    0 0 30px #7c3aed60,
+    0 0 80px #06b6d430;
 }
 
 .btn-secondary {
@@ -229,7 +278,13 @@ h2::after {
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, #7c3aed60, #06b6d460, transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #7c3aed60,
+    #06b6d460,
+    transparent
+  );
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -346,7 +401,13 @@ pre.feature-content {
   left: -100%;
   width: 100%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, #7c3aed, #06b6d4, transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #7c3aed,
+    #06b6d4,
+    transparent
+  );
   transition: left 0.6s ease;
 }
 
@@ -458,7 +519,9 @@ pre.feature-content {
 
 .hello-demo input:focus {
   border-color: #7c3aed;
-  box-shadow: 0 0 0 3px #7c3aed20, 0 0 20px #7c3aed10;
+  box-shadow:
+    0 0 0 3px #7c3aed20,
+    0 0 20px #7c3aed10;
 }
 
 .code-block {
@@ -506,7 +569,13 @@ summary.code-summary:hover {
 
 .divider {
   height: 1px;
-  background: linear-gradient(90deg, transparent, #7c3aed60, #06b6d460, transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #7c3aed60,
+    #06b6d460,
+    transparent
+  );
   margin: 4rem 0;
   position: relative;
 }
