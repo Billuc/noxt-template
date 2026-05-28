@@ -174,8 +174,8 @@ export default defineIsland(Hello, import.meta.path);`}
                 <${FeatureCard} icon="🚀" title="Getting Started">
                   <p>
                     Create page components in <code>pages/</code> and island
-                    components in <code>islands/</code>. Use <code>defineIsland</code>
-                    to mark interactive components and <code>prepareIsland</code>
+                    components in <code>islands/</code>. Use <code>defineIsland</code>${" "}
+                    to mark interactive components and <code>prepareIsland</code>${" "}
                     to use them in pages.
                   </p>
                 </${FeatureCard}>
@@ -183,9 +183,9 @@ export default defineIsland(Hello, import.meta.path);`}
                 <${FeatureCard} icon="🛠️" title="Commands">
                   <ul>
                     <li><code>bun install</code> — Install dependencies.</li>
-                    <li><code>bun run index.ts</code> — Start the development server.</li>
-                    <li><code>bun build --target=bun --outdir=dist index.ts</code> — Build for production.</li>
-                    <li><code>cd dist && bun run index.js</code> — Preview the bundled project.</li>
+                    <li><code>bun dev / bun run index.ts</code> — Start the development server.</li>
+                    <li><code>bun run build / bun build --target=bun --outdir=dist index.ts</code> — Build for production.</li>
+                    <li><code>bun preview / cd dist && bun run index.js</code> — Preview the bundled project.</li>
                   </ul>
                 </${FeatureCard}>
 

@@ -364,7 +364,7 @@ h2::after {
 }
 
 .feature-content li {
-  padding: 0.35rem 0;
+  padding: 0.2rem 0;
   border-bottom: 1px solid #ffffff08;
 }
 
@@ -454,9 +454,9 @@ pre.feature-content {
   color: #e0e0e0;
   border: 1px solid #334155;
   border-radius: 8px;
-  padding: 0.6rem 1.2rem;
+  padding: 0.4rem 0.8rem;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 1.5rem;
   font-weight: 500;
   transition: all 0.2s ease;
   min-width: 44px;
@@ -482,6 +482,7 @@ pre.feature-content {
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  margin: auto 0.5rem;
 }
 
 .hello-demo {
@@ -604,7 +605,6 @@ footer {
 
 footer a {
   color: #a78bfa;
-  text-decoration: none;
   transition: all 0.2s;
 }
 
