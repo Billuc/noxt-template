@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "MODE=development bun run --watch ./index.ts",
     "build": "bun build --target=bun --outdir=dist index.ts",
-    "preview": "cd dist && bun run ./index.js"
+    "preview": "cd dist && bun run ./index.js",
+    "prerender-static": "bun run ./prerender.ts",
+    "prerender-static-preview": "bun run ./prerender.ts --preview"
   },
   "devDependencies": {
     "@types/bun": "latest"
